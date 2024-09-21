@@ -2,14 +2,14 @@
 module FFT #(
     parameter   WIDTH = 16
 )(
-    input               clock,  //  Master Clock
-    input               reset,  //  Active High Asynchronous Reset
-    input               di_en,  //  Input Data Enable
-    input   [WIDTH-1:0] di_re,  //  Input Data (Real)
-    input   [WIDTH-1:0] di_im,  //  Input Data (Imag)
-    output              do_en,  //  Output Data Enable
-    output  [WIDTH-1:0] do_re,  //  Output Data (Real)
-    output  [WIDTH-1:0] do_im   //  Output Data (Imag)
+    input               clock,  
+    input               reset,  
+    input               data_input_en, 
+    input   [WIDTH-1:0] data_input_real,  
+    input   [WIDTH-1:0] data_input_complex,  
+    output              data_output_en,  
+    output  [WIDTH-1:0] data_output_real,  
+    output  [WIDTH-1:0] data_output_complex 
 );
   
 //  The result is scaled to 1/N and output in bit-reversed order.
@@ -25,34 +25,34 @@ wire[WIDTH-1:0] su2_do_im;
 SdfUnit #(.N(64),.M(64),.WIDTH(WIDTH)) SU1 (
     .clock  (clock      ),  //  i
     .reset  (reset      ),  //  i
-    .di_en  (di_en      ),  //  i
-    .di_re  (di_re      ),  //  i
-    .di_im  (di_im      ),  //  i
-    .do_en  (su1_do_en  ),  //  o
-    .do_re  (su1_do_re  ),  //  o
-    .do_im  (su1_do_im  )   //  o
+    .data_input_en  (data_input_en),  //  i
+    .data_input_real  (data_input_real      ),  //  i
+    .data_input_complex  (data_input_complex      ),  //  i
+    .data_output_en  (su1_do_en  ),  //  o
+    .data_output_real  (su1_do_re  ),  //  o
+    .data_output_complex  (su1_do_im  )   //  o
 );
 
 SdfUnit #(.N(64),.M(16),.WIDTH(WIDTH)) SU2 (
     .clock  (clock      ),  //  i
     .reset  (reset      ),  //  i
-    .di_en  (su1_do_en  ),  //  i
-    .di_re  (su1_do_re  ),  //  i
-    .di_im  (su1_do_im  ),  //  i
-    .do_en  (su2_do_en  ),  //  o
-    .do_re  (su2_do_re  ),  //  o
-    .do_im  (su2_do_im  )   //  o
+    .data_input_en  (su1_do_en  ),  //  i
+    .data_input_real  (su1_do_re  ),  //  i
+    .data_input_complex  (su1_do_im  ),  //  i
+    .data_output_en  (su2_do_en  ),  //  o
+    .data_output_real  (su2_do_re  ),  //  o
+    .data_output_complex  (su2_do_im  )   //  o
 );
 
 SdfUnit #(.N(64),.M(4),.WIDTH(WIDTH)) SU3 (
     .clock  (clock      ),  //  i
     .reset  (reset      ),  //  i
-    .di_en  (su2_do_en  ),  //  i
-    .di_re  (su2_do_re  ),  //  i
-    .di_im  (su2_do_im  ),  //  i
-    .do_en  (do_en      ),  //  o
-    .do_re  (do_re      ),  //  o
-    .do_im  (do_im      )   //  o
+    .data_input_en  (su2_do_en  ),  //  i
+    .data_input_real  (su2_do_re  ),  //  i
+    .data_input_complex  (su2_do_im  ),  //  i
+    .data_output_en  (data_output_en      ),  //  o
+    .data_output_real  (data_output_real      ),  //  o
+    .data_output_complex  (data_output_complex      )   //  o
 );
 
 endmodule

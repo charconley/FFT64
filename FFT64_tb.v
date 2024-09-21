@@ -4,12 +4,12 @@ module TB;
 
 reg 		clock;
 reg 		reset;
-reg 		di_en;
-reg [15:0]	di_re;
-reg [15:0]	di_im;
-wire		do_en;
-wire[15:0]	do_re;
-wire[15:0]	do_im;
+reg 		data_input_en;
+reg [15:0]	data_input_real;
+reg [15:0]	data_input_complex;
+wire		data_output_en;
+wire[15:0]	data_output_real;
+wire[15:0]	data_output_complex;
 
 reg [15:0]	imem[0:127];
 reg [15:0]	omem[0:127];
@@ -31,7 +31,7 @@ end
 //	Input Control Initialize
 initial begin
 	wait (reset == 1);
-	di_en = 0;
+	data_input_en = 0;
 end
 
 //	Output Data Capture
@@ -39,10 +39,10 @@ initial begin : OCAP
 	integer 	n;
 	forever begin
 		n = 0;
-		while (do_en !== 1) @(negedge clock);
-		while ((do_en == 1) && (n < 64)) begin
-			omem[2*n  ] = do_re;
-			omem[2*n+1] = do_im;
+		while (data_output_en !== 1) @(negedge clock);
+		while ((data_output_en == 1) && (n < 64)) begin
+			omem[2*n  ] = data_output_real;
+			omem[2*n+1] = data_output_complex;
 			n = n + 1;
 			@(negedge clock);
 		end
@@ -60,15 +60,15 @@ endtask
 task GenerateInputWave;
 	integer n;
 begin
-	di_en <= 1;
+	data_input_en <= 1;
 	for (n = 0; n < 64; n = n + 1) begin
-		di_re <= imem[2*n];
-		di_im <= imem[2*n+1];
+		data_input_real <= imem[2*n];
+		data_input_complex <= imem[2*n+1];
 		@(posedge clock);
 	end
-	di_en <= 0;
-	di_re <= 'bx;
-	di_im <= 'bx;
+	data_input_en <= 0;
+	data_input_real <= 'bx;
+	data_input_complex <= 'bx;
 end
 endtask
 
@@ -93,14 +93,14 @@ endtask
 
 //	Module Instances
 FFT FFT (
-	.clock	(clock	),	//	i
-	.reset	(reset	),	//	i
-	.di_en	(di_en	),	//	i
-	.di_re	(di_re	),	//	i
-	.di_im	(di_im	),	//	i
-	.do_en	(do_en	),	//	o
-	.do_re	(do_re	),	//	o
-	.do_im	(do_im	)	//	o
+	.clock	(clock								),
+	.reset	(reset								),	
+	.data_input_en	(data_input_en				),	
+	.data_input_real (data_input_real			),	
+	.data_input_complex	(data_input_complex		),	
+	.data_output_en	(data_output_en				),	
+	.data_output_real	(data_output_real		),	
+	.data_output_complex (data_output_complex	)	
 );
 
 `include "stim.v"
